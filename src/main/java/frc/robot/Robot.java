@@ -99,12 +99,13 @@ public class Robot extends TimedRobot {
     }
 
     processRobotModeChange(RobotMode.TELEOP);
+    logger.info("I am  dead");
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {}
-
+    
   @Override
   public void testInit() {
     processRobotModeChange(RobotMode.TEST);
