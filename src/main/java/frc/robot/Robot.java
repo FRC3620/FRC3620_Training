@@ -99,6 +99,7 @@ public class Robot extends TimedRobot {
     }
 
     processRobotModeChange(RobotMode.TELEOP);
+    logger.info("\n" + "Hello World!" + "\n" + "I feel alive!!!");
   }
 
   /** This function is called periodically during operator control. */
