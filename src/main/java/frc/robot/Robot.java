@@ -99,6 +99,7 @@ public class Robot extends TimedRobot {
     }
 
     processRobotModeChange(RobotMode.TELEOP);
+    logger.info ("the fitness gram pacer test is a multi-stage aerobic capacity test that progressively gets more difficult as it continues");
   }
 
   /** This function is called periodically during operator control. */
