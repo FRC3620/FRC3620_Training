@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.sql.Driver;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -81,11 +82,14 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+    logger.info("auto");
+
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
+    logger.info("Autoing", null, currentRobotMode);
   }
 
   @Override
@@ -99,12 +103,14 @@ public class Robot extends TimedRobot {
     }
 
     processRobotModeChange(RobotMode.TELEOP);
-    logger.info("I am  dead");
+    logger.info("tele");
   }
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    logger.info("teleing", null, currentRobotMode);
+  }
     
   @Override
   public void testInit() {
