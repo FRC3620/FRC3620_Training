@@ -1,12 +1,15 @@
 package frc.robot;
 
 import java.util.Date;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 import org.slf4j.Logger;
 import org.usfirst.frc3620.logger.EventLogging;
 import org.usfirst.frc3620.logger.EventLogging.Level;
 import org.usfirst.frc3620.misc.GitNess;
 import org.usfirst.frc3620.misc.RobotMode;
+import edu.wpi.first.networktables.DoubleEntry;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,6 +30,12 @@ public class Robot extends TimedRobot {
 
   static private RobotMode currentRobotMode = RobotMode.INIT, previousRobotMode;
 
+  //DoubleEntry aEntry, bEntry, xEntry; //This just is easier for making multiple things of the same type. But meh.
+DoubleEntry aEntry;
+DoubleEntry bEntry;
+DoubleEntry xEntry;
+
+
   Date dateAtInitialization = new Date();
 
   /**
@@ -41,7 +50,10 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-
+    //The network table creates a topic called "SmartDashboard" with a value of "a" so that I can get an entry of it and put it in there.
+    aEntry = NetworkTableInstance.getDefault().getDoubleTopic("/SmartDashboard/a").getEntry(0.0); //
+    bEntry = NetworkTableInstance.getDefault().getDoubleTopic("/SmartDashboard/b").getEntry(0.0);
+    xEntry = NetworkTableInstance.getDefault().getDoubleTopic("/SmartDashboard/x").getEntry(0.0);
   }
 
   /**
@@ -57,6 +69,10 @@ public class Robot extends TimedRobot {
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
+    double aEntryValue = aEntry.get(1);
+    double bEntryValue = bEntry.get(1);
+    double xEntryValue = aEntryValue + bEntryValue;
+    xEntry.get(xEntryValue);
     CommandScheduler.getInstance().run();
   }
 
