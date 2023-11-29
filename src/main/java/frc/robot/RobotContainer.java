@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class RobotContainer {
   public final static Logger logger = EventLogging.getLogger(RobotContainer.class, Level.INFO);
+
+public static PropellorSubsystem propellorSubsystem;
   
   // hardware here...
 
@@ -43,6 +45,7 @@ public class RobotContainer {
   }
 
   private void makeSubsystems() {
+    propellorSubsystem = new PropellorSubsystem();
   }
 
   /**
@@ -60,6 +63,7 @@ public class RobotContainer {
 
   private void setupSmartDashboardCommands() {
     // DriveSubsystem
+    SmartDashboard.putData(new RunPropellorCommand());
   }
 
   SendableChooser<CommandFactory> chooser = new SendableChooser<>();
