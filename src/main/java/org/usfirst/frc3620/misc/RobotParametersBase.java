@@ -30,7 +30,7 @@ public class RobotParametersBase {
     public String getName() {
         return name;
     }
-
+    
     // TODO, looks like Jackson is not serializing this field.
     public boolean shouldMakeAllCANDevices() {
         return makeAllCANDevices;
