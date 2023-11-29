@@ -25,6 +25,7 @@ public class RobotContainer {
   // hardware here...
 
   // subsystems here
+  public static PropellorSubsystem propellorSubsystem;
 
   // joysticks here....
   public static Joystick driverJoystick;
@@ -33,7 +34,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     makeSubsystems();
-
+    propellorSubsystem = new PropellorSubsystem();
     // Configure the button bindings
     configureButtonBindings();
 
@@ -60,6 +61,7 @@ public class RobotContainer {
 
   private void setupSmartDashboardCommands() {
     // DriveSubsystem
+    SmartDashboard.putData(new RunPropellorCommand());
   }
 
   SendableChooser<CommandFactory> chooser = new SendableChooser<>();
