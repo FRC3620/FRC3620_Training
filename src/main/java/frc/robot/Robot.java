@@ -31,7 +31,7 @@ public class Robot extends TimedRobot {
 
   Date dateAtInitialization = new Date();
 
-  DoubleEntry aEntry, bEntry, cEntry, xEntry;
+  DoubleEntry aEntry, bEntry, xEntry;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -48,11 +48,9 @@ public class Robot extends TimedRobot {
 
     aEntry = NetworkTableInstance.getDefault().getDoubleTopic("/SmartDashboard/a").getEntry(0.0);
     bEntry = NetworkTableInstance.getDefault().getDoubleTopic("/SmartDashboard/b").getEntry(0.0);
-    cEntry = NetworkTableInstance.getDefault().getDoubleTopic("/SmartDashboard/b").getEntry(0.0);
     xEntry = NetworkTableInstance.getDefault().getDoubleTopic("/SmartDashboard/x").getEntry(0.0);
     aEntry.set(0.0);
     bEntry.set(0.0);
-    cEntry.set(0.0);
     xEntry.set(0.0);
   }
 
@@ -73,8 +71,7 @@ public class Robot extends TimedRobot {
 
     double a = aEntry.get();
     double b = bEntry.get();
-    double c = cEntry.get();
-    double x = (a + b + c)/(a*b*c);
+    double x = (a + b)/(a*b);
     xEntry.set(x);
   }
 
@@ -122,7 +119,8 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
   public void testInit() {

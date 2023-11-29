@@ -25,6 +25,7 @@ public class RobotContainer {
   // hardware here...
 
   // subsystems here
+  public static PropellorSubsystem propellorSubsystem;
 
   // joysticks here....
   public static Joystick driverJoystick;
@@ -43,6 +44,7 @@ public class RobotContainer {
   }
 
   private void makeSubsystems() {
+    propellorSubsystem = new PropellorSubsystem();
   }
 
   /**
@@ -60,6 +62,7 @@ public class RobotContainer {
 
   private void setupSmartDashboardCommands() {
     // DriveSubsystem
+    SmartDashboard.putData(new RunPropellorCommand());
   }
 
   SendableChooser<CommandFactory> chooser = new SendableChooser<>();
