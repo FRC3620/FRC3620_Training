@@ -7,9 +7,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 public class RunPropellorCommand extends CommandBase {
+  double savedPower;
 
   /** Creates a new RunPropellorCommand. */
-  public RunPropellorCommand() {
+  public RunPropellorCommand(double power) {
+    savedPower = power;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(RobotContainer.propellorSubsystem);
   }
@@ -21,7 +23,7 @@ public class RunPropellorCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    RobotContainer.propellorSubsystem.spinPropellor(0.5);
+    RobotContainer.propellorSubsystem.spinPropellor(savedPower);
   }
 
   // Called once the command ends or is interrupted.
