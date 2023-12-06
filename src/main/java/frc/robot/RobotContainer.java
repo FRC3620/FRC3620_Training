@@ -12,6 +12,8 @@ import org.usfirst.frc3620.logger.LogCommand;
 import org.usfirst.frc3620.logger.EventLogging.Level;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -26,18 +28,28 @@ public class RobotContainer {
 
   // subsystems here
 
+  public static PropellorSubsystem propellorSubsystem;
+ 
   // joysticks here....
   public static Joystick driverJoystick;
   public static Joystick operatorJoystick;
+  
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     makeSubsystems();
+propellorSubsystem = new PropellorSubsystem();
+    
+
 
     // Configure the button bindings
     configureButtonBindings();
 
+    Trigger button1 = new JoystickButton(driverJoystick, 1);
+    button1.whileTrue(new RunPropellorCommand(-0.2));
+
     setupSmartDashboardCommands();
+SmartDashboard.putData(new RunPropellorCommand(0.4));
 
     setupAutonomousCommands();
   }
@@ -52,6 +64,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    Trigger button1 = new JoystickButton(driverJoystick, 1);
     driverJoystick = new Joystick(0);
     operatorJoystick = new Joystick(1);
 
