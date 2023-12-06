@@ -61,7 +61,9 @@ public static PropellorSubsystem propellorSubsystem;
 
   private void setupSmartDashboardCommands() {
     // DriveSubsystem
-    SmartDashboard.putData(new RunPropellorCommand());
+    SmartDashboard.putData(new RunPropellorCommand(0.4));
+    SmartDashboard.putData(new ForwardAndBackCommand());
+    SmartDashboard.putData(new RunPropellorFromJoystickCommand());
   }
 
   SendableChooser<CommandFactory> chooser = new SendableChooser<>();
@@ -82,5 +84,8 @@ public static PropellorSubsystem propellorSubsystem;
     Command command = factory.get();
     logger.info ("Command Factory gave us a {}", command);
     return command;
+  }
+  public static double readSpinJoystick() {
+    return driverJoystick.getRawAxis(0);
   }
 }
