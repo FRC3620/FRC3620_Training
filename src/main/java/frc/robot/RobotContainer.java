@@ -68,7 +68,7 @@ public class RobotContainer {
   }
 
   private void setupSmartDashboardCommands() {
-    SmartDashboard.putData("1",new RunPropellorCommand(.4));
+    SmartDashboard.putData("1",new RunPropellorCommand(.6));
     SmartDashboard.putData(new RunPropellorCommand(.4));
     SmartDashboard.putData (new ForwardAndBackCommand());
     // DriveSubsystem
