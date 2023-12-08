@@ -66,11 +66,15 @@ public class RobotContainer {
 
     // DPad operatorDPad = new DPad(operatorJoystick, 0);
   }
+  public static double readSpinJoystick(){
+    return driverJoystick.getRawAxis(0);
+  }
 
   private void setupSmartDashboardCommands() {
     SmartDashboard.putData("1",new RunPropellorCommand(.6));
     SmartDashboard.putData(new RunPropellorCommand(.4));
     SmartDashboard.putData (new ForwardAndBackCommand());
+    SmartDashboard.putData(new RunPropellorFromJoystickCommand());
     // DriveSubsystem
   }
 
