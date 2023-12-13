@@ -6,12 +6,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.function.Supplier;
 
+
 import org.slf4j.Logger;
 import org.usfirst.frc3620.logger.EventLogging;
 import org.usfirst.frc3620.logger.LogCommand;
 import org.usfirst.frc3620.logger.EventLogging.Level;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -33,14 +39,12 @@ public class RobotContainer {
   // joysticks here....
   public static Joystick driverJoystick;
   public static Joystick operatorJoystick;
-  
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    makeSubsystems();
-propellorSubsystem = new PropellorSubsystem();
-    
+  
 
+    makeSubsystems();
 
     // Configure the button bindings
     configureButtonBindings();
@@ -56,6 +60,7 @@ SmartDashboard.putData(new RunPropellorCommand(0.4));
   }
 
   private void makeSubsystems() {
+    propellorSubsystem = new PropellorSubsystem();
   }
 
   /**
@@ -66,6 +71,7 @@ SmartDashboard.putData(new RunPropellorCommand(0.4));
    */
   private void configureButtonBindings() {
     Trigger button1 = new JoystickButton(driverJoystick, 1);
+    button1.whileTrue(new RunPropellorCommand(-0.2));
     driverJoystick = new Joystick(0);
     operatorJoystick = new Joystick(1);
 
@@ -79,10 +85,57 @@ SmartDashboard.putData(new RunPropellorCommand(0.4));
     SmartDashboard.putData(new RunPropellorCommand(.4));
     SmartDashboard.putData(new ForwardAndBackCommand());
     SmartDashboard.putData(new RunPropellorFromJoystick());
+    SmartDashboard.putData(new RunPropellorCommand(.4));
+
+    SmartDashboard.putData("Sequential",new SequentialCommandGroup(
+    new WaitCommand(.4),
+    new WaitCommand(.6),
+    new WaitCommand(.2)) );
+
+    SmartDashboard.putData("Parallel", new ParallelCommandGroup(
+      new WaitCommand(.4),
+      new WaitCommand(.6),
+      new WaitCommand(.2)
+    ));
+
+    SmartDashboard.putData("Race", new ParallelRaceGroup(
+      new WaitCommand(.4),
+      new WaitCommand(.6),
+      new WaitCommand(.2)
+    ));
+
+    SmartDashboard.putData("Deadline", new ParallelDeadlineGroup(getAutonomousCommand(), 
+    new WaitCommand(.4),
+    new WaitCommand(.6),
+    new WaitCommand(.2)));
+
+
+    SmartDashboard.putData("Prop-Parellel ", new ParallelCommandGroup(
+      new WaitCommand(5),
+      new RunPropellorForeverCommand(.4)
+    ));
+
+    SmartDashboard.putData("Prop-Race", new ParallelRaceGroup(
+      new WaitCommand(5),
+      new RunPropellorForeverCommand(0)
+    ));
+
+    SmartDashboard.putData("Prop-Deadline1", new ParallelDeadlineGroup( 
+      new WaitCommand(5),
+      new RunPropellorForeverCommand(.4)
+    ));
+
+    SmartDashboard.putData("Prop-Deadline2", new ParallelDeadlineGroup( 
+      new RunPropellorForeverCommand(.4),
+      new WaitCommand(5)
+    ));
+
+    SmartDashboard.putData("Decorated", new WaitCommand(5).deadlineWith(new RunPropellorForeverCommand(.3)) );
   }
 
   SendableChooser<CommandFactory> chooser = new SendableChooser<>();
   public void setupAutonomousCommands() {
+    SmartDashboard.putData(new RunPropellorCommand(0.4));
     SmartDashboard.putData("Auto mode", chooser);
     chooser.setDefaultOption("Do nothing", () -> new LogCommand("no autonomous specified, did nothing"));
   }
