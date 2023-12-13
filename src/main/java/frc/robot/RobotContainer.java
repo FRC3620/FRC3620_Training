@@ -12,25 +12,36 @@ import org.usfirst.frc3620.logger.LogCommand;
 import org.usfirst.frc3620.logger.EventLogging.Level;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
   public final static Logger logger = EventLogging.getLogger(RobotContainer.class, Level.INFO);
-  
+
   // hardware here...
 
   // subsystems here
-
+  public static PropellorSubsystem propellorSubsystem;
   // joysticks here....
   public static Joystick driverJoystick;
   public static Joystick operatorJoystick;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     makeSubsystems();
 
@@ -40,15 +51,19 @@ public class RobotContainer {
     setupSmartDashboardCommands();
 
     setupAutonomousCommands();
+
+    propellorSubsystem = new PropellorSubsystem();
   }
 
   private void makeSubsystems() {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
@@ -60,15 +75,54 @@ public class RobotContainer {
 
   private void setupSmartDashboardCommands() {
     // DriveSubsystem
+    SmartDashboard.putData(new RunPropellorCommand(0.4));
+    SmartDashboard.putData(new ForwardAndBackCommand());
+    SmartDashboard.putData(new RunPropellorFromJoystickCommand());
+    SmartDashboard.putData("sequential", new SequentialCommandGroup(
+        new WaitCommand(4.0),
+        new WaitCommand(6.0),
+        new WaitCommand(2.0)));
+    SmartDashboard.putData("Parallel", new ParallelCommandGroup(
+        new WaitCommand(4.0),
+        new WaitCommand(6.0),
+        new WaitCommand(2.0)));
+    SmartDashboard.putData("Race", new ParallelRaceGroup(
+        new WaitCommand(4.0),
+        new WaitCommand(6.0),
+        new WaitCommand(2.0)));
+    SmartDashboard.putData("Deadline", new ParallelDeadlineGroup(
+        new WaitCommand(4.0),
+        new WaitCommand(6.0),
+        new WaitCommand(2.0)));
+    SmartDashboard.putData(new RunPropellorForeverCommand(.8));
+    SmartDashboard.putData("Prop-Parallel", new ParallelCommandGroup(
+      new WaitCommand(4.0),
+      new RunPropellorForeverCommand(0.5)
+    ));
+    SmartDashboard.putData("Prop-Race", new ParallelRaceGroup(
+      new WaitCommand(4.0),
+      new RunPropellorForeverCommand(0.5)
+    ));
+    SmartDashboard.putData("Prop-Deadline1", new ParallelDeadlineGroup(
+      new WaitCommand(4.0),
+      new RunPropellorForeverCommand(0.5)
+    ));
+    SmartDashboard.putData("Prop-Deadline2", new ParallelDeadlineGroup(
+      new RunPropellorForeverCommand(0.5),
+      new WaitCommand(4.0)
+    ));
+    SmartDashboard.putData("Decorated", new WaitCommand(0.5).deadlineWith(new RunPropellorForeverCommand(3.0)));
   }
 
   SendableChooser<CommandFactory> chooser = new SendableChooser<>();
+
   public void setupAutonomousCommands() {
     SmartDashboard.putData("Auto mode", chooser);
     chooser.setDefaultOption("Do nothing", () -> new LogCommand("no autonomous specified, did nothing"));
   }
 
-  interface CommandFactory extends Supplier<Command> { }
+  interface CommandFactory extends Supplier<Command> {
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -78,7 +132,11 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     CommandFactory factory = chooser.getSelected();
     Command command = factory.get();
-    logger.info ("Command Factory gave us a {}", command);
+    logger.info("Command Factory gave us a {}", command);
     return command;
+  }
+
+  public static double readSpinJoystick() {
+    return driverJoystick.getRawAxis(0);
   }
 }

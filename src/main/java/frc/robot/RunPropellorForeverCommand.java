@@ -4,53 +4,35 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
-public class RunPropellorCommand extends CommandBase {
+public class RunPropellorForeverCommand extends CommandBase {
   double savedPower;
-  Timer timer;
 
-  /** Creates a new RunPropellorCommand. */
-  public RunPropellorCommand(double power) {
+  /** Creates a new RunPropellorForeverCommand. */
+  public RunPropellorForeverCommand(double power) {
     // Use addRequirements() here to declare subsystem dependencies.
     savedPower = power;
-    timer = new Timer();
-    addRequirements(RobotContainer.propellorSubsystem);
+    RobotContainer.propellorSubsystem.spinPropellor(savedPower);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    timer.reset();
-    timer.start();
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    double power = savedPower;
-    if (timer.hasElapsed(2.0)) {
-      power = savedPower / 3;
-    } else if (timer.hasElapsed(1.0)) {
-      power = savedPower / 2;
-    } else {
-      power = savedPower;
-    }
-
-    RobotContainer.propellorSubsystem.spinPropellor(savedPower);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    timer.stop();
     RobotContainer.propellorSubsystem.spinPropellor(0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return timer.hasElapsed(5.0);
+    return false;
   }
 }
