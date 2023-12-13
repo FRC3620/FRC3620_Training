@@ -12,6 +12,11 @@ import org.usfirst.frc3620.logger.LogCommand;
 import org.usfirst.frc3620.logger.EventLogging.Level;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -38,7 +43,26 @@ public static PropellorSubsystem propellorSubsystem;
     configureButtonBindings();
 
     setupSmartDashboardCommands();
-
+    SmartDashboard.putData("Sequential", new SequentialCommandGroup(
+      new WaitCommand(4.0),
+      new WaitCommand(6.0),
+      new WaitCommand(2.0)));
+      SmartDashboard.putData("Sequential", new SequentialCommandGroup(
+        new WaitCommand(4.0),
+        new WaitCommand(6.0),
+        new WaitCommand(2.0)));
+    SmartDashboard.putData("Parallel", new ParallelCommandGroup(
+        new WaitCommand(4.0),
+        new WaitCommand(6.0),
+        new WaitCommand(2.0)));
+    SmartDashboard.putData("Race", new ParallelRaceGroup(
+        new WaitCommand(4.0),
+        new WaitCommand(6.0),
+        new WaitCommand(2.0)));
+    SmartDashboard.putData("Deadline", new ParallelDeadlineGroup(
+        new WaitCommand(4.0),
+        new WaitCommand(6.0),
+        new WaitCommand(2.0)));
     setupAutonomousCommands();
   }
 
@@ -64,6 +88,25 @@ public static PropellorSubsystem propellorSubsystem;
     SmartDashboard.putData(new RunPropellorCommand(0.4));
     SmartDashboard.putData(new ForwardAndBackCommand());
     SmartDashboard.putData(new RunPropellorFromJoystickCommand());
+    SmartDashboard.putData(new RunPropellorForeverCommand(0.4));
+    SmartDashboard.putData ("Prop-Parallel", new ParallelCommandGroup(
+      new WaitCommand(4.0),
+      new RunPropellorForeverCommand(0.5)
+    ));
+    SmartDashboard.putData("Prop-Race", new ParallelRaceGroup(
+      new WaitCommand(4.0),
+      new RunPropellorForeverCommand(0.5)
+    ));
+    SmartDashboard.putData("Prop-Deadline1", new ParallelDeadlineGroup(
+      new WaitCommand(4.0),
+      new RunPropellorForeverCommand(0.5)
+    ));
+    SmartDashboard.putData("Prop-Deadline2", new ParallelDeadlineGroup(
+      new RunPropellorForeverCommand(0.5),
+      new WaitCommand(4.0)
+    ));
+    SmartDashboard.putData("Decorated", new WaitCommand(0.5).deadlineWith(new RunPropellorForeverCommand(3.0)));
+
   }
 
   SendableChooser<CommandFactory> chooser = new SendableChooser<>();
