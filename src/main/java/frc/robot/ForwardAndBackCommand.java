@@ -14,7 +14,7 @@ public class ForwardAndBackCommand extends SequentialCommandGroup {
   public ForwardAndBackCommand() {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands (new RunPropellorComand ( 0.5), new RunPropellorComand(-0.5));
+    addCommands (new RunPropellorCommand ( 0.5), new RunPropellorCommand(-0.5));
    
 
   }

@@ -7,12 +7,12 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
-public class RunPropellorComand extends CommandBase {
+public class RunPropellorCommand extends CommandBase {
   
   Timer timer;
   private double savedPower;
   /** Creates a new RunPropellorComand. */
-  public RunPropellorComand(double power) {
+  public RunPropellorCommand(double power) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(RobotContainer.propellorSubsystem);
      savedPower = power; 

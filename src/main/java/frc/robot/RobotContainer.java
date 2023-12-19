@@ -61,8 +61,8 @@ public class RobotContainer {
     operatorJoystick = new Joystick(1);
     Trigger button1 = new JoystickButton(driverJoystick, 1);
     Trigger button2 = new JoystickButton(driverJoystick,2 );
-    button1.whileTrue(new RunPropellorComand(-0.2));
-    button2.whileTrue(new RunPropellorComand( -0.3 ));
+    button1.whileTrue(new RunPropellorCommand(-0.2));
+    button2.whileTrue(new RunPropellorCommand( -0.3 ));
     // DPad operatorDPad = new DPad(operatorJoystick, 0);
   }
   public static double readSpinJoystick(){
@@ -71,7 +71,7 @@ public class RobotContainer {
 
   private void setupSmartDashboardCommands() {
     // DriveSubsystem
-    SmartDashboard.putData (new RunPropellorComand (0.4));
+    SmartDashboard.putData (new RunPropellorCommand (0.4));
     SmartDashboard.putData (new ForwardAndBackCommand());
     SmartDashboard.putData (new ForwardAndBackCommand());
     SmartDashboard.putData (new RunPropellorFromJoystickComand());
