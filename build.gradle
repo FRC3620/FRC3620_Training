@@ -1,12 +1,23 @@
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2024.1.1"
+    // FRC3620 ****************************************************************
+    id "com.gorylenko.gradle-git-properties" version "2.4.1"
+    // later:
+    // id 'com.diffplug.spotless' version '6.12.0'
+    // ************************************************************************
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
+
+// FRC3620 ********************************************************************
+compileJava.options.encoding = 'UTF-8' 
+compileTestJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
+// ****************************************************************************
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
@@ -53,6 +64,17 @@ dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.9'
+    implementation group: 'org.slf4j', name: 'jul-to-slf4j', version: '2.0.9' // JUL bridge
+
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j2-impl', version: '2.22.0'
+
+    // https://mvnrepository.com/artifact/com.lmax/disruptor
+    implementation group: 'com.lmax', name: 'disruptor', version: '3.4.3'
+
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
 
@@ -69,6 +91,11 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    testImplementation 'junit:junit:4.13.1'
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.1") {
+        because 'allows JUnit 3 and JUnit 4 tests to run'
+    }
 }
 
 test {
@@ -87,6 +114,15 @@ jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     from sourceSets.main.allSource
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
+    // FRC3620 ****************************************************************
+    // this is so log4j2 can scan classes for plugins
+    manifest {
+        attributes(
+                "Manifest-Version": "1.0",
+                "Multi-Release": true
+        )
+    }
+    // ************************************************************************
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
@@ -99,3 +135,108 @@ wpi.java.configureTestTasks(test)
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
+
+// FRC3620 ********************************************************************
+// git wonderfulness
+
+task printGitProperties {
+    dependsOn generateGitProperties
+    doLast {
+        println "Project: " + project.ext.gitProps["project.dir"]
+        println "Branch: " + project.ext.gitProps["git.branch"]
+        println "Describe: " + project.ext.gitProps["git.commit.id.describe"]
+        println "Dirty: "  + project.ext.gitProps["git.dirty"]
+        println "Build time: " + project.ext.gitProps["build.time"]
+        println "Build host: " + project.ext.gitProps["git.build.host"]
+    }
+}
+
+def getBuildTime() {
+    return new Date().toString();
+}
+
+gitProperties {
+    // Customize directory using gitPropertiesResourceDir config
+    // The directory in this config key is also added as a classpath entry
+    // (so the git.properties file will be included in the final JAR file)
+    customProperty "build.time", { getBuildTime() }
+    customProperty "project.dir", { project.projectDir.getName() }
+    customProperty 'git.commit.id.describe', { it.describe(tags: true, always: true) }
+    gitPropertiesResourceDir = file("${project.rootDir}/src/main/deploy")
+    extProperty = 'gitProps'
+}
+generateGitProperties.finalizedBy printGitProperties // make sure we do things in the correct order
+generateGitProperties.outputs.upToDateWhen { false } // make sure the generateGitProperties task always executes (even when git.properties is not changed)
+
+tasks.processResources.dependsOn generateGitProperties // make sure we do things in the correct order
+// https://stackoverflow.com/a/70648216/17887564
+tasks.processResources.outputs.upToDateWhen { false }  // make sure the processResources task always runs
+
+// ****************************************************************************
+
+// FRC3620 ********************************************************************
+
+// this helps junit test results show up in output
+// look at https://stackoverflow.com/a/36130467/17887564 for some more suggestions
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        // events "passed", "failed" // , "started", "skipped"
+        showStandardStreams true
+        showExceptions true
+    }
+}
+
+tasks.test {
+    // only run tests if explicitly specified
+    // https://discuss.gradle.org/t/dont-run-tests-unless-test-task-specified-on-command-line/33700/4 
+    // run tests with .\gradlew test --tests <test-names>
+    enabled = gradle.startParameter.taskNames.contains("test")
+}
+
+// spotless!
+if (false) {
+    spotless {
+        java {
+            target fileTree('.') {
+                include '**/*.java'
+                exclude '**/build/**', '**/build-*/**'
+            }
+            toggleOffOn()
+            googleJavaFormat()
+            removeUnusedImports()
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
+        groovyGradle {
+            target fileTree('.') {
+                include '**/*.gradle'
+                exclude '**/build/**', '**/build-*/**'
+            }
+            greclipse()
+            indentWithSpaces(4)
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
+        format 'xml', {
+            target fileTree('.') {
+                include '**/*.xml'
+                exclude '**/build/**', '**/build-*/**'
+            }
+            eclipseWtp('xml')
+            trimTrailingWhitespace()
+            indentWithSpaces(2)
+            endWithNewline()
+        }
+        format 'misc', {
+            target fileTree('.') {
+                include '**/*.md', '**/.gitignore'
+                exclude '**/build/**', '**/build-*/**'
+            }
+            trimTrailingWhitespace()
+            indentWithSpaces(2)
+            endWithNewline()
+        }
+    }
+}
+// ****************************************************************************
