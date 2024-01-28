@@ -1,13 +1,17 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2023.4.2"
+    id "edu.wpi.first.GradleRIO" version "2024.1.1"
     // FRC3620 ****************************************************************
-    id "com.gorylenko.gradle-git-properties" version "2.3.2"
+    id "com.gorylenko.gradle-git-properties" version "2.4.1"
+    // later:
+    // id 'com.diffplug.spotless' version '6.12.0'
     // ************************************************************************
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 // FRC3620 ********************************************************************
 compileJava.options.encoding = 'UTF-8' 
@@ -52,7 +56,7 @@ def deployArtifact = deploy.targets.roborio.artifacts.frcJava
 wpi.java.debugJni = false
 
 // Set this to true to enable desktop support.
-def includeDesktopSupport = false
+def includeDesktopSupport = true
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
@@ -60,18 +64,17 @@ dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
-    // implementation 'com.google.code.gson:gson:2.8.9'
-
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
-    implementation group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.32' // JUL bridge
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.9'
+    implementation group: 'org.slf4j', name: 'jul-to-slf4j', version: '2.0.9' // JUL bridge
 
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.18.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.18.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.18.0'
+    annotationProcessor('org.apache.logging.log4j:log4j-core:2.22.0')
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j2-impl', version: '2.22.0'
 
     // https://mvnrepository.com/artifact/com.lmax/disruptor
-    implementation group: 'com.lmax', name: 'disruptor', version: '3.4.4'
+    implementation group: 'com.lmax', name: 'disruptor', version: '3.4.3'
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
@@ -87,12 +90,11 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     testImplementation 'junit:junit:4.13.1'
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2") {
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.1") {
         because 'allows JUnit 3 and JUnit 4 tests to run'
     }
 }
@@ -100,16 +102,6 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
-
-    // FRC3620 ********************************************************************
-    // test wonderfulness
-    filter {
-        // https://stackoverflow.com/a/52879530/17887564
-        setFailOnNoMatchingTests(false)
-
-        includeTestsMatching 'DummyTest'
-    }
-    // ****************************************************************************
 }
 
 // Simulation configuration (e.g. environment variables).
@@ -121,13 +113,14 @@ wpi.sim.addDriverstation()
 // knows where to look for our Robot Class.
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    from sourceSets.main.allSource
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     // FRC3620 ****************************************************************
     // this is so log4j2 can scan classes for plugins
     manifest {
         attributes(
-            "Manifest-Version": "1.0",
-            "Multi-Release": true
+                "Manifest-Version": "1.0",
+                "Multi-Release": true
         )
     }
     // ************************************************************************
@@ -145,8 +138,8 @@ tasks.withType(JavaCompile) {
 }
 
 // FRC3620 ********************************************************************
-
 // git wonderfulness
+
 task printGitProperties {
     dependsOn generateGitProperties
     doLast {
@@ -169,7 +162,7 @@ gitProperties {
     // (so the git.properties file will be included in the final JAR file)
     customProperty "build.time", { getBuildTime() }
     customProperty "project.dir", { project.projectDir.getName() }
-    customProperty 'git.commit.id.describe', { it.describe(tags: true, always: true) } 
+    customProperty 'git.commit.id.describe', { it.describe(tags: true, always: true) }
     gitPropertiesResourceDir = file("${project.rootDir}/src/main/deploy")
     extProperty = 'gitProps'
 }
@@ -182,14 +175,69 @@ tasks.processResources.outputs.upToDateWhen { false }  // make sure the processR
 
 // ****************************************************************************
 
+// FRC3620 ********************************************************************
+
 // this helps junit test results show up in output
 // look at https://stackoverflow.com/a/36130467/17887564 for some more suggestions
-tasks.withType(Test) { 
-  testLogging {
-    exceptionFormat "full"
-    // events "passed", "failed" // , "started", "skipped"
-    showStandardStreams true
-    showExceptions true
-  }
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        // events "passed", "failed" // , "started", "skipped"
+        showStandardStreams true
+        showExceptions true
+    }
+}
+
+tasks.test {
+    // only run tests if explicitly specified
+    // https://discuss.gradle.org/t/dont-run-tests-unless-test-task-specified-on-command-line/33700/4 
+    // run tests with .\gradlew test --tests <test-names>
+    enabled = gradle.startParameter.taskNames.contains("test")
+}
+
+// spotless!
+if (false) {
+    spotless {
+        java {
+            target fileTree('.') {
+                include '**/*.java'
+                exclude '**/build/**', '**/build-*/**'
+            }
+            toggleOffOn()
+            googleJavaFormat()
+            removeUnusedImports()
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
+        groovyGradle {
+            target fileTree('.') {
+                include '**/*.gradle'
+                exclude '**/build/**', '**/build-*/**'
+            }
+            greclipse()
+            indentWithSpaces(4)
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
+        format 'xml', {
+            target fileTree('.') {
+                include '**/*.xml'
+                exclude '**/build/**', '**/build-*/**'
+            }
+            eclipseWtp('xml')
+            trimTrailingWhitespace()
+            indentWithSpaces(2)
+            endWithNewline()
+        }
+        format 'misc', {
+            target fileTree('.') {
+                include '**/*.md', '**/.gitignore'
+                exclude '**/build/**', '**/build-*/**'
+            }
+            trimTrailingWhitespace()
+            indentWithSpaces(2)
+            endWithNewline()
+        }
+    }
 }
 // ****************************************************************************

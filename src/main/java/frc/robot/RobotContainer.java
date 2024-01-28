@@ -28,7 +28,6 @@ public class RobotContainer {
 
   // joysticks here....
   public static Joystick driverJoystick;
-  public static Joystick operatorJoystick;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -53,13 +52,9 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     driverJoystick = new Joystick(0);
-    operatorJoystick = new Joystick(1);
-
-    // DPad operatorDPad = new DPad(operatorJoystick, 0);
   }
 
   private void setupSmartDashboardCommands() {
-    // DriveSubsystem
   }
 
   SendableChooser<CommandFactory> chooser = new SendableChooser<>();
